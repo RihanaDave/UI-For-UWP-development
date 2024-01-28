@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="CopyBinaries" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="Config.UWP.proj"  />
+	<PropertyGroup>
+		<BuildDependsOn>
+			$(BuildDependsOn);
+			CopyBinaries;
+		</BuildDependsOn>
+	</PropertyGroup>
+
+
+  <Target Name="CopyBinaries">
+
+		<PropertyGroup>
+			<PlatformSubFolder Condition=" '$(Platform)' != 'AnyCPU' ">$(Platform)\</PlatformSubFolder>
+			<TargetPlatformSubFolder Condition=" '$(PlatformSubFolder)' == 'Win32\' ">x86\</TargetPlatformSubFolder>
+			<TargetPlatformSubFolder Condition=" '$(PlatformSubFolder)' != 'Win32\' ">$(PlatformSubFolder)</TargetPlatformSubFolder>
+			<BinariesSourceFolder>$(MSBuildProjectDirectory)\bin\$(PlatformSubFolder)$(Configuration)</BinariesSourceFolder>
+            <XBFSourceFolder>$(MSBuildProjectDirectory)\obj\$(PlatformSubFolder)\$(Configuration)\$(AssemblyName)\Themes</XBFSourceFolder>
+			<BinariesDestinationFolder>$(BinariesOutDir)\$(TargetPlatformSubFolder)</BinariesDestinationFolder>
+		</PropertyGroup>
+
+		<ItemGroup>
+      <BinariesToCopy Condition=" '$(ControlName)' == '' "
+                      Include="$(BinariesSourceFolder)\**\*"
+                      Exclude="$(BinariesSourceFolder)\**\*.tmp;
+							   $(BinariesSourceFolder)\**\*CodeAnalysisLog.xml;
+							   $(BinariesSourceFolder)\**\*.lastcodeanalysissucceeded;
+                 $(BinariesSourceFolder)\System.Runtime.WindowsRuntime.UI.Xaml.dll
+							   "/>
+      <BinariesToCopy Condition=" '$(ControlName)' == 'Map' "
+                      Include="$(BinariesSourceFolder)\**\*"
+                      Exclude="$(BinariesSourceFolder)\**\*.tmp;
+			  				  $(BinariesSourceFolder)\**\*CodeAnalysisLog.xml;
+                  $(BinariesSourceFolder)\**\Telerik.Core.*;   
+                  $(BinariesSourceFolder)\**\Telerik.UI.Xaml.Primitives.UWP.*;
+                  $(BinariesSourceFolder)\**\Telerik.Geospatial.UWP.*;
+							   $(BinariesSourceFolder)\**\*.lastcodeanalysissucceeded
+							   "/>
+      <BinariesToCopy Condition=" '$(ControlName)' == 'Map' "
+                      Include="@(BinariesToCopy); 
+                      $(BinariesSourceFolder)\**\Telerik.UI.Xaml.Primitives.UWP\*.xr.xml"/>
+		</ItemGroup>
+
+    <ItemGroup>
+      <XBFFiles Include="$(XBFSourceFolder)\**\*.xbf" />
+    </ItemGroup>
+
+		<Message Text="DEBUG INFO: CopyBinaries from: &quot;$(BinariesSourceFolder)&quot; Configuration=$(Configuration) to: &quot;$(BinariesDestinationFolder)&quot;"   />
+		<Copy SourceFiles="@(BinariesToCopy)"
+              DestinationFolder="$(BinariesDestinationFolder)\%(RecursiveDir)"   />
+
+    <Message Text="DEBUG INFO: CopyXBF from: &quot;$(XBFSourceFolder)&quot; Configuration=$(Configuration) --- @(XBFFiles)"   />
+    <Copy SourceFiles="@(XBFFiles)"
+          DestinationFolder="$(BinariesDestinationFolder)\$(AssemblyName)\Themes\%(RecursiveDir)" />
+		  
+    </Target>
+
+</Project>
